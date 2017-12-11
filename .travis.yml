@@ -5,3 +5,5 @@ services:
   
 script:
   - docker build .
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" hub.docker.com
+  - docker push tannevaled/httpd-shibboleth-sp
