@@ -9,7 +9,7 @@ RUN yum -y update \
     && yum -y install httpd shibboleth.x86_64 mod_ssl \
     && yum -y clean all
 
-COPY httpd-shibd-foreground /usr/local/bin/
+COPY application.sh /usr/local/bin/
 
 RUN test -d /var/run/lock || mkdir -p /var/run/lock \
     && test -d /var/lock/subsys/ || mkdir -p /var/lock/subsys/ \
@@ -27,4 +27,4 @@ RUN test -d /var/run/lock || mkdir -p /var/run/lock \
     
 EXPOSE 80 443
 
-CMD ["httpd-shibd-foreground"]
+CMD ["application.sh"]
