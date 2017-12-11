@@ -5,6 +5,7 @@ services:
   
 script:
   - docker build .
+  - docker tag httpd-shibboleth-sp $DOCKER_USERNAME/httpd-shibboleth-sp
   - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
   - docker push $DOCKER_USERNAME/httpd-shibboleth-sp
   - docker logout
