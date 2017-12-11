@@ -1,5 +1,10 @@
 FROM centos:7.4.1708
 
+ENV HTTPD_PREFIX /etc/httpd
+ENV HTTPD_CONF   $HTTPD_PREFIX/conf/httpd.conf
+ENV HTTPD_CONFD  $HTTPD_PREFIX/conf.d
+ENV SSL_CONF     $HTTPD_CONFD/ssl.conf
+
 RUN yum -y update \
     && yum -y install wget \
     && wget -O /etc/yum.repos.d/security_shibboleth.repo http://download.opensuse.org/repositories/security://shibboleth/CentOS_7/security:shibboleth.repo \
@@ -17,13 +22,13 @@ RUN test -d /var/run/lock || mkdir -p /var/run/lock \
     && echo $'export LD_LIBRARY_PATH=/opt/shibboleth/lib64:$LD_LIBRARY_PATH\n'\
        > /etc/sysconfig/shibd \
     && chmod +x /etc/sysconfig/shibd /etc/shibboleth/shibd-redhat /usr/local/bin/application.sh \
-    && sed -i 's/ErrorLog "logs\/error_log"/ErrorLog \/dev\/stdout/g' /etc/httpd/conf/httpd.conf \
-    && echo -e "\nErrorLogFormat \"httpd-error [%{u}t] [%-m:%l] [pid %P:tid %T] %7F: %E: [client\ %a] %M% ,\ referer\ %{Referer}i\"" >> /etc/httpd/conf/httpd.conf \
-    && sed -i 's/CustomLog "logs\/access_log" combined/CustomLog \/dev\/stdout \"httpd-combined %h %l %u %t \\\"%r\\\" %>s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\"/g' /etc/httpd/conf/httpd.conf \
-    && sed -i 's/ErrorLog logs\/ssl_error_log/ErrorLog \/dev\/stdout/g' /etc/httpd/conf.d/ssl.conf \
+    && sed -i 's/ErrorLog "logs\/error_log"/ErrorLog \/dev\/stdout/g' $HTTPD_CONF \
+    && echo -e "\nErrorLogFormat \"httpd-error [%{u}t] [%-m:%l] [pid %P:tid %T] %7F: %E: [client\ %a] %M% ,\ referer\ %{Referer}i\"" >> $HTTPD_CONF \
+    && sed -i 's/CustomLog "logs\/access_log" combined/CustomLog \/dev\/stdout \"httpd-combined %h %l %u %t \\\"%r\\\" %>s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\"/g' $HTTPD_CONF \
+    && sed -i 's/ErrorLog logs\/ssl_error_log/ErrorLog \/dev\/stdout/g' $SSL_CONF \
     && sed -i 's/<\/VirtualHost>/ErrorLogFormat \"httpd-ssl-error [%{u}t] [%-m:%l] [pid %P:tid %T] %7F: %E: [client\\ %a] %M% ,\\ referer\\ %{Referer}i\"\n<\/VirtualHost>/g' /etc/httpd/conf.d/ssl.conf \
-    && sed -i 's/CustomLog logs\/ssl_request_log/CustomLog \/dev\/stdout/g' /etc/httpd/conf.d/ssl.conf \
-    && sed -i 's/TransferLog logs\/ssl_access_log/TransferLog \/dev\/stdout/g' /etc/httpd/conf.d/ssl.conf
+    && sed -i 's/CustomLog logs\/ssl_request_log/CustomLog \/dev\/stdout/g' $SSL_CONF \
+    && sed -i 's/TransferLog logs\/ssl_access_log/TransferLog \/dev\/stdout/g' $SSL_CONF 
     
 EXPOSE 80 443
 
